@@ -1,0 +1,12 @@
+{
+  "start_url": "https://books.toscrape.com/catalogue/page-1.html",
+  "in_stock_text": "in stock",
+  "selectors": {
+    "item": "article.product_pod",
+    "title": "h3 a",
+    "price": "p.price_color",
+    "rating": "p.star-rating",
+    "stock": "p.availability",
+    "next": "li.next a"
+  }
+}
