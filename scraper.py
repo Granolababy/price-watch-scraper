@@ -29,7 +29,7 @@ from typing import Iterable
 from urllib.parse import urljoin
 
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, UnicodeDammit
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
@@ -72,7 +72,11 @@ def make_session(retries: int = 3, backoff: float = 0.5) -> requests.Session:
 def fetch(session: requests.Session, url: str, timeout: int = 20) -> str:
     resp = session.get(url, timeout=timeout)
     resp.raise_for_status()
-    return resp.text
+    # Decode the raw bytes ourselves instead of trusting resp.text. When a server sends
+    # no charset, requests assumes Latin-1 and "£" comes out as "Â£". So: try UTF-8
+    # first (strict), then the encoding from the HTTP header, then the page's <meta> tag.
+    candidates = ["utf-8"] + ([resp.encoding] if resp.encoding else [])
+    return UnicodeDammit(resp.content, candidates, is_html=True).unicode_markup
 
 
 # --------------------------------------------------------------------------- #
